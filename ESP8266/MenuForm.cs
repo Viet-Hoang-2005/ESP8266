@@ -25,10 +25,6 @@ namespace ESP8266
         private readonly int espOfflineThreshold = 5 * 60; // Thời gian tối đa để coi ESP8266 là offline 5 phút
         private readonly HttpClient httpClient = new HttpClient();
 
-        // Lấy nhiệt độ và độ ẩm từ dữ liệu nhận được của ThingSpeak
-        private string getTemperature;
-        private string getHumidity;
-
         private bool isFirstUpdateCompleted = false; // Cờ kiểm soát lần cập nhật đầu tiên
         private ChatBot chatBot; // Thêm tham chiếu đến ChatBot
 
@@ -47,6 +43,13 @@ namespace ESP8266
             pnChatBot.Controls.Add(chatBot);
         }
 
+        private void MenuForm_Resize(object sender, EventArgs e)
+        {
+            pnHome.Location = new Point(
+                (this.ClientSize.Width - pnHome.Width) / 2,
+                pnHome.Location.Y
+            );
+        }
         private void PlotView_MouseWheel(object sender, MouseEventArgs e)
         {
             ((HandledMouseEventArgs)e).Handled = true;
@@ -107,9 +110,6 @@ namespace ESP8266
                     string humidity = feed["field2"]?.ToString() ?? "Không có dữ liệu";
                     string relayState = feed["field3"]?.ToString();
                     string createdAt = feed["created_at"]?.ToString();
-
-                    getTemperature = temperature;
-                    getHumidity = humidity;
 
                     UpdateRefreshTime(createdAt, vietnamTime); // Cập nhật thời gian làm mới dữ liệu
                     UpdateRelayStatus(relayState); // Cập nhật trạng thái Relay
@@ -326,6 +326,96 @@ namespace ESP8266
 
             model.Series.Add(humSeries);
             pvHumidity.Model = model;
+        }
+
+        private void pnHome_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void lbRelay_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lbTemperature_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lbHuminity_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblStatus_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblRefreshData_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblChat_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void guna2HtmlLabel6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pnChatBot_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void lblTitle_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnTemperature_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnHumidity_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pvTemperature_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnRelay_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pnHumidity_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void pvHumidity_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pnTemperature_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void pnStatus_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

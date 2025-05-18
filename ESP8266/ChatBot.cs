@@ -20,7 +20,7 @@ namespace ESP8266
         // Biến lưu trữ giá trị trước đó của nhiệt độ và độ ẩm để kiểm tra sự thay đổi
         private string prevTemperature = null;
         private string prevHumidity = null;
-        
+
         private bool isRoleDefined = false; // Cờ để kiểm tra xem vai trò đã được định nghĩa chưa
 
         public ChatBot()
@@ -87,7 +87,7 @@ namespace ESP8266
         // Định nghĩa vai trò cho Gemini
         private string DefineRole()
         {
-            return "Bạn là một trợ lý AI đánh giá trạng thái môi trường dựa trên dữ liệu nhiệt độ, độ ẩm và trạng thái relay. Cung cấp phân tích ngắn gọn (tối đa 150 từ) và khuyến nghị nếu cần. ";
+            return "Bạn là một trợ lý AI đánh giá trạng thái môi trường dựa trên dữ liệu nhiệt độ và độ ẩm. Cung cấp phân tích ngắn gọn (tối đa 150 từ) và khuyến nghị nếu cần. ";
         }
 
         // Lấy dữ liệu môi trường hiện tại
