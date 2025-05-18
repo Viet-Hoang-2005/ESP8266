@@ -61,7 +61,6 @@
             this.lbRelay.Size = new System.Drawing.Size(168, 33);
             this.lbRelay.TabIndex = 0;
             this.lbRelay.Text = "Trạng thái Relay";
-            this.lbRelay.Click += new System.EventHandler(this.lbRelay_Click);
             // 
             // lbTemperature
             // 
@@ -72,7 +71,6 @@
             this.lbTemperature.Size = new System.Drawing.Size(92, 33);
             this.lbTemperature.TabIndex = 0;
             this.lbTemperature.Text = "Nhiệt độ";
-            this.lbTemperature.Click += new System.EventHandler(this.lbTemperature_Click);
             // 
             // lblTitle
             // 
@@ -83,7 +81,6 @@
             this.lblTitle.Size = new System.Drawing.Size(764, 47);
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "Giám sát Thiết bị đo nhiệt độ và độ ẩm Real-time";
-            this.lblTitle.Click += new System.EventHandler(this.lblTitle_Click);
             // 
             // lblStatus
             // 
@@ -94,7 +91,6 @@
             this.lblStatus.Size = new System.Drawing.Size(238, 39);
             this.lblStatus.TabIndex = 0;
             this.lblStatus.Text = "Trạng thái hiện tại";
-            this.lblStatus.Click += new System.EventHandler(this.lblStatus_Click);
             // 
             // pnHome
             // 
@@ -113,7 +109,6 @@
             this.pnHome.Name = "pnHome";
             this.pnHome.Size = new System.Drawing.Size(1182, 950);
             this.pnHome.TabIndex = 1;
-            this.pnHome.Paint += new System.Windows.Forms.PaintEventHandler(this.pnHome_Paint);
             // 
             // lblRefreshData
             // 
@@ -124,7 +119,6 @@
             this.lblRefreshData.Size = new System.Drawing.Size(439, 25);
             this.lblRefreshData.TabIndex = 0;
             this.lblRefreshData.Text = "Dữ liệu được làm mới lúc: 2025-05-18 13:20:16 +07+0700";
-            this.lblRefreshData.Click += new System.EventHandler(this.lblRefreshData_Click);
             // 
             // lblChat
             // 
@@ -135,7 +129,6 @@
             this.lblChat.Size = new System.Drawing.Size(107, 39);
             this.lblChat.TabIndex = 0;
             this.lblChat.Text = "ChatBot";
-            this.lblChat.Click += new System.EventHandler(this.lblChat_Click);
             // 
             // guna2HtmlLabel6
             // 
@@ -146,7 +139,6 @@
             this.guna2HtmlLabel6.Size = new System.Drawing.Size(100, 39);
             this.guna2HtmlLabel6.TabIndex = 0;
             this.guna2HtmlLabel6.Text = "Biểu đồ";
-            this.guna2HtmlLabel6.Click += new System.EventHandler(this.guna2HtmlLabel6_Click);
             // 
             // pnChatBot
             // 
@@ -155,7 +147,6 @@
             this.pnChatBot.Name = "pnChatBot";
             this.pnChatBot.Size = new System.Drawing.Size(1069, 600);
             this.pnChatBot.TabIndex = 1;
-            this.pnChatBot.Paint += new System.Windows.Forms.PaintEventHandler(this.pnChatBot_Paint);
             // 
             // pnStatus
             // 
@@ -170,7 +161,6 @@
             this.pnStatus.Name = "pnStatus";
             this.pnStatus.Size = new System.Drawing.Size(1069, 189);
             this.pnStatus.TabIndex = 3;
-            this.pnStatus.Paint += new System.Windows.Forms.PaintEventHandler(this.pnStatus_Paint);
             // 
             // btnTemperature
             // 
@@ -187,7 +177,6 @@
             this.btnTemperature.Size = new System.Drawing.Size(267, 113);
             this.btnTemperature.TabIndex = 1;
             this.btnTemperature.Text = "26.2°C";
-            this.btnTemperature.Click += new System.EventHandler(this.btnTemperature_Click);
             // 
             // btnHumidity
             // 
@@ -204,7 +193,6 @@
             this.btnHumidity.Size = new System.Drawing.Size(267, 113);
             this.btnHumidity.TabIndex = 1;
             this.btnHumidity.Text = "54.0%";
-            this.btnHumidity.Click += new System.EventHandler(this.btnHumidity_Click);
             // 
             // lbHuminity
             // 
@@ -215,7 +203,6 @@
             this.lbHuminity.Size = new System.Drawing.Size(70, 33);
             this.lbHuminity.TabIndex = 0;
             this.lbHuminity.Text = "Độ ẩm";
-            this.lbHuminity.Click += new System.EventHandler(this.lbHuminity_Click);
             // 
             // btnRelay
             // 
@@ -232,7 +219,6 @@
             this.btnRelay.Size = new System.Drawing.Size(231, 113);
             this.btnRelay.TabIndex = 1;
             this.btnRelay.Text = "Bật";
-            this.btnRelay.Click += new System.EventHandler(this.btnRelay_Click);
             // 
             // pnHumidity
             // 
@@ -241,7 +227,6 @@
             this.pnHumidity.Name = "pnHumidity";
             this.pnHumidity.Size = new System.Drawing.Size(1069, 354);
             this.pnHumidity.TabIndex = 2;
-            this.pnHumidity.Paint += new System.Windows.Forms.PaintEventHandler(this.pnHumidity_Paint);
             // 
             // pvHumidity
             // 
@@ -255,7 +240,6 @@
             this.pvHumidity.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
             this.pvHumidity.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
             this.pvHumidity.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
-            this.pvHumidity.Click += new System.EventHandler(this.pvHumidity_Click);
             // 
             // pnTemperature
             // 
@@ -264,7 +248,6 @@
             this.pnTemperature.Name = "pnTemperature";
             this.pnTemperature.Size = new System.Drawing.Size(1069, 352);
             this.pnTemperature.TabIndex = 2;
-            this.pnTemperature.Paint += new System.Windows.Forms.PaintEventHandler(this.pnTemperature_Paint);
             // 
             // pvTemperature
             // 
@@ -278,7 +261,6 @@
             this.pvTemperature.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
             this.pvTemperature.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
             this.pvTemperature.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
-            this.pvTemperature.Click += new System.EventHandler(this.pvTemperature_Click);
             // 
             // MenuForm
             // 
