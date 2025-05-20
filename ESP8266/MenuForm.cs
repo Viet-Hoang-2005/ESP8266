@@ -18,14 +18,14 @@ namespace ESP8266
     public partial class MenuForm : Form
     {
         // Các biến lưu trữ thông tin bao gồm Id và API từ ThingSpeak
-        private readonly string channelId = "2943515";
-        private readonly string readApiKey = "LRSNX2AOSRS49MZQ";
+        private string channelId = "2943515";
+        private string readApiKey = "LRSNX2AOSRS49MZQ";
 
-        private readonly int refreshInterval = 10; // Thời gian làm mới dữ liệu là 10 
-        private readonly int espOfflineThreshold = 5 * 60; // Thời gian tối đa để coi ESP8266 là offline 5 phút
-        private readonly HttpClient httpClient = new HttpClient();
+        private int refreshInterval = 30; // Thời gian làm mới dữ liệu là 30 giây
+        private int espOfflineThreshold = 5 * 60; // Thời gian tối đa để coi ESP8266 là offline 5 phút
+        private HttpClient httpClient = new HttpClient();
 
-        private bool isFirstUpdateCompleted = false; // Cờ kiểm soát lần cập nhật đầu tiên
+        private bool isFirstUpdate = false; // Cờ kiểm soát lần cập nhật đầu tiên
         private ChatBot chatBot = new ChatBot();
 
         public MenuForm()
@@ -36,6 +36,8 @@ namespace ESP8266
             // Thêm sự kiện cho các biểu đồ để không bị cuộn khi dùng chuột
             pvTemperature.MouseWheel += PlotView_MouseWheel;
             pvHumidity.MouseWheel += PlotView_MouseWheel;
+
+            StartPosition = FormStartPosition.CenterScreen;
         }
 
         // Hàm căn giữa cho panel để giữ bố cục khi form được phóng to
@@ -78,21 +80,19 @@ namespace ESP8266
                     // Chuyển đổi sang giờ Việt Nam (UTC+7)
                     var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                     var createdAtVietnam = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, vietnamTimeZone);
+                    
+                    var timeDiff = (DateTime.UtcNow - createdAtUtc).TotalSeconds; // Tính thời gian chênh lệch để kiểm tra trạng thái ESP8266
 
-                    // Tính thời gian chênh lệch để kiểm tra trạng thái ESP8266
-                    var timeDiff = (DateTime.UtcNow - createdAtUtc).TotalSeconds;
-
-                    // Cập nhật trạng thái ESP8266 và thời gian làm mới dữ liệu
-                    lblStatus.Text = timeDiff <= espOfflineThreshold
+                    lblStatus.Text = timeDiff <= espOfflineThreshold // Cập nhật trạng thái ESP8266 và thời gian làm mới dữ liệu
                         ? $"Trạng thái ESP8266: Online"
                         : $"Trạng thái ESP8266: Offline";
-                    lblRefreshData.Text = $"Dữ liệu được làm mới lúc: {createdAtVietnam:yyyy-MM-dd hh:mm:ss tt}"; // Sử dụng định dạng 12h với AM/PM
+                    lblRefreshData.Text = $"Dữ liệu được làm mới lúc: {createdAtVietnam:yyyy-MM-dd hh:mm:ss tt}";
+
                 }
                 catch (Exception ex)
                 {
                     lblStatus.Text = "Lỗi khi chuyển đổi thời gian.";
                     lblRefreshData.Text = $"Dữ liệu được làm mới lúc: {vietnamTime:yyyy-MM-dd hh:mm:ss tt} (Lỗi: {ex.Message})";
-                    Console.WriteLine($"Lỗi trong UpdateRefreshTime: {ex.Message}"); // Ghi log lỗi để debug
                 }
             }
             else
@@ -240,13 +240,13 @@ namespace ESP8266
                 await UpdateData();
 
                 // Nếu lần cập nhật đầu tiên đã hoàn thành, đợi 10 phút trước khi cập nhật tiếp theo
-                if (isFirstUpdateCompleted)
+                if (isFirstUpdate)
                 {
                     await Task.Delay(refreshInterval * 1000);
                 }
                 else
                 {
-                    isFirstUpdateCompleted = true; // Đánh dấu lần đầu tiên hoàn thành
+                    isFirstUpdate = true; // Đánh dấu lần đầu tiên hoàn thành
                 }
             }
         }
@@ -285,22 +285,24 @@ namespace ESP8266
             // Tạo trục thời gian
             var dateAxis = new DateTimeAxis
             {
-                Position = AxisPosition.Bottom,
+                Position = AxisPosition.Bottom, // Đặt trục thời gian ở dưới cùng
                 Title = "Thời gian",
-                IntervalType = DateTimeIntervalType.Auto,
-                MajorGridlineStyle = LineStyle.Solid,
-                MinorGridlineStyle = LineStyle.Dot
+                IntervalType = DateTimeIntervalType.Auto, // Tự động điều chỉnh khoảng cách giữa các nhãn
+                MajorGridlineStyle = LineStyle.Solid, // Đường lưới chính
+                MinorGridlineStyle = LineStyle.Dot // Đường lưới phụ
             };
 
+            // Thêm sự kiện điều chỉnh định dạng nhãn theo khoảng thời gian
             dateAxis.AxisChanged += DateAxis_AxisChanged;
             model.Axes.Add(dateAxis);
 
+            // Tạo trục nhiệt độ
             model.Axes.Add(new LinearAxis
             {
-                Position = AxisPosition.Left,
+                Position = AxisPosition.Left, // Đặt trục nhiệt độ ở bên trái
                 Title = "Nhiệt độ (°C)",
-                Minimum = 0,
-                Maximum = 50
+                Minimum = 0, // Giá trị tối thiểu của trục là 0 độ
+                Maximum = 50 //  Giá trị tối đa của trục là 50 độ
             });
 
             var tempSeries = new LineSeries
@@ -312,10 +314,10 @@ namespace ESP8266
             // Thêm các điểm dữ liệu vào biểu đồ
             foreach (var feed in feeds)
             {
-                if (feed.Temperature.HasValue)
+                if (feed.Temperature.HasValue) // Kiểm tra xem nhiệt độ có giá trị hay không
                 {
-                    double xValue = DateTimeAxis.ToDouble(feed.Time);
-                    tempSeries.Points.Add(new DataPoint(xValue, feed.Temperature.Value));
+                    double xValue = DateTimeAxis.ToDouble(feed.Time); // Chuyển đổi thời gian thành giá trị số
+                    tempSeries.Points.Add(new DataPoint(xValue, feed.Temperature.Value)); // Thêm điểm dữ liệu vào biểu đồ
                 }
             }
 
@@ -344,8 +346,6 @@ namespace ESP8266
                 Title = "Độ ẩm (%)",
                 Minimum = 0,
                 Maximum = 100,
-                AbsoluteMinimum = 0,
-                AbsoluteMaximum = 100
             };
             model.Axes.Add(humidityAxis);
 

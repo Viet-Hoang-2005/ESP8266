@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChatBot));
             this.tbChat = new Guna.UI2.WinForms.Guna2TextBox();
             this.pnChatBot = new Guna.UI2.WinForms.Guna2Panel();
             this.rtbMessages = new System.Windows.Forms.RichTextBox();
@@ -74,7 +75,6 @@
             this.rtbMessages.Size = new System.Drawing.Size(497, 497);
             this.rtbMessages.TabIndex = 3;
             this.rtbMessages.Text = "";
-            this.rtbMessages.TextChanged += new System.EventHandler(this.R);
             // 
             // btnRefresh
             // 
@@ -121,10 +121,9 @@
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(552, 613);
             this.Controls.Add(this.pnChatBot);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ChatBot";
             this.Text = "ChatBot";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ChatBot_FormClosed);
-            this.Load += new System.EventHandler(this.ChatBot_Load);
             this.pnChatBot.ResumeLayout(false);
             this.ResumeLayout(false);
 

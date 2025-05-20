@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MenuForm));
             this.lbRelay = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.lbTemperature = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.lblTitle = new Guna.UI2.WinForms.Guna2HtmlLabel();
@@ -266,6 +267,7 @@
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1182, 953);
             this.Controls.Add(this.pnHome);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MenuForm";
             this.Text = "Giám sát thiết bị Real-time";

@@ -177,20 +177,5 @@ namespace ESP8266
             rtbMessages.AppendText(message);
             rtbMessages.ScrollToCaret();
         }
-
-        private void ChatBot_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void ChatBot_FormClosed(object sender, FormClosedEventArgs e)
-        {
-
-        }
-
-        private void R(object sender, EventArgs e)
-        {
-
-        }
     }
 }
