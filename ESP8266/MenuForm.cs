@@ -21,7 +21,7 @@ namespace ESP8266
         private readonly string channelId = "2943515";
         private readonly string readApiKey = "LRSNX2AOSRS49MZQ";
 
-        private readonly int refreshInterval = 10 * 60; // Thời gian làm mới dữ liệu là 10 phút
+        private readonly int refreshInterval = 10; // Thời gian làm mới dữ liệu là 10 
         private readonly int espOfflineThreshold = 5 * 60; // Thời gian tối đa để coi ESP8266 là offline 5 phút
         private readonly HttpClient httpClient = new HttpClient();
 
@@ -36,7 +36,6 @@ namespace ESP8266
             // Thêm sự kiện cho các biểu đồ để không bị cuộn khi dùng chuột
             pvTemperature.MouseWheel += PlotView_MouseWheel;
             pvHumidity.MouseWheel += PlotView_MouseWheel;
-
         }
 
         // Hàm căn giữa cho panel để giữ bố cục khi form được phóng to
@@ -77,7 +76,6 @@ namespace ESP8266
                     }
 
                     // Chuyển đổi sang giờ Việt Nam (UTC+7)
-                    // var createdAtUtc = DateTime.Parse(createdAt).ToUniversalTime();
                     var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                     var createdAtVietnam = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, vietnamTimeZone);
 
@@ -128,7 +126,7 @@ namespace ESP8266
                     UpdateRelayStatus(relayState); // Cập nhật trạng thái Relay
                     UpdateTemperatureAndHumidity(temperature, humidity); // Cập nhật nhiệt độ và độ ẩm
 
-                    // Lấy dữ liệu lịch sử để vẽ biểu đồ (200 bản ghi)
+                    // Lấy dữ liệu lịch sử để vẽ biểu đồ và truyền cho ChatBot (200 bản ghi)
                     var recentData = await FetchData($"https://api.thingspeak.com/channels/{channelId}/feeds.json?api_key={readApiKey}&results=200");
                     if (recentData != null)
                     {
@@ -167,11 +165,15 @@ namespace ESP8266
                         // Vẽ biểu đồ nhiệt độ và độ ẩm
                         PlotTemperature(feeds);
                         PlotHumidity(feeds);
+
+                        // Truyền dữ liệu lịch sử cho ChatBot
+                        chatBot.UpdateHistoricalData(feeds);
                     }
                     else
                     {
                         pvTemperature.Model = new PlotModel { Title = "Không có dữ liệu nhiệt độ" };
                         pvHumidity.Model = new PlotModel { Title = "Không có dữ liệu độ ẩm" };
+                        chatBot.UpdateHistoricalData(new List<(DateTime Time, float? Temperature, float? Humidity)>());
                     }
                 }
                 else
@@ -179,6 +181,7 @@ namespace ESP8266
                     lblStatus.Text = "Không có dữ liệu mới nhất từ ThingSpeak.";
                     pvTemperature.Model = new PlotModel { Title = "Không có dữ liệu nhiệt độ" };
                     pvHumidity.Model = new PlotModel { Title = "Không có dữ liệu độ ẩm" };
+                    chatBot.UpdateHistoricalData(new List<(DateTime Time, float? Temperature, float? Humidity)>());
                 }
             }
             catch (Exception ex)
@@ -186,6 +189,7 @@ namespace ESP8266
                 lblStatus.Text = $"Lỗi: {ex.Message}";
                 pvTemperature.Model = new PlotModel { Title = $"Lỗi: {ex.Message}" };
                 pvHumidity.Model = new PlotModel { Title = $"Lỗi: {ex.Message}" };
+                chatBot.UpdateHistoricalData(new List<(DateTime Time, float? Temperature, float? Humidity)>());
             }
         }
 
@@ -334,13 +338,16 @@ namespace ESP8266
             dateAxis.AxisChanged += DateAxis_AxisChanged;
             model.Axes.Add(dateAxis);
 
-            model.Axes.Add(new LinearAxis
+            var humidityAxis = new LinearAxis
             {
                 Position = AxisPosition.Left,
                 Title = "Độ ẩm (%)",
                 Minimum = 0,
-                Maximum = 50
-            });
+                Maximum = 100,
+                AbsoluteMinimum = 0,
+                AbsoluteMaximum = 100
+            };
+            model.Axes.Add(humidityAxis);
 
             var humSeries = new LineSeries
             {
@@ -363,7 +370,12 @@ namespace ESP8266
 
         private void btnChatbot_Click(object sender, EventArgs e)
         {
+            if (chatBot == null || chatBot.IsDisposed)
+            {
+                chatBot = new ChatBot();
+            }
             chatBot.Show();
+            chatBot.BringToFront();
         }
     }
 }

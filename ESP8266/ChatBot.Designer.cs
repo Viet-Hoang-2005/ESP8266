@@ -74,6 +74,7 @@
             this.rtbMessages.Size = new System.Drawing.Size(497, 497);
             this.rtbMessages.TabIndex = 3;
             this.rtbMessages.Text = "";
+            this.rtbMessages.TextChanged += new System.EventHandler(this.R);
             // 
             // btnRefresh
             // 
@@ -122,6 +123,7 @@
             this.Controls.Add(this.pnChatBot);
             this.Name = "ChatBot";
             this.Text = "ChatBot";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ChatBot_FormClosed);
             this.Load += new System.EventHandler(this.ChatBot_Load);
             this.pnChatBot.ResumeLayout(false);
             this.ResumeLayout(false);

@@ -12,7 +12,8 @@ using System.Windows.Forms;
 
 namespace ESP8266
 {
-    public partial class ChatBot: Form
+
+    public partial class ChatBot : Form
     {
         private readonly HttpClient httpClient = new HttpClient();
         private readonly string geminiApiKey = "AIzaSyDYgaiUtUoh4HYayXW6UqYIVj34Lsqdshk"; // API key cho Gemini API
@@ -25,8 +26,11 @@ namespace ESP8266
         private string prevTemperature = null;
         private string prevHumidity = null;
 
+        // Biến lưu trữ dữ liệu lịch sử
+        private List<(DateTime Time, float? Temperature, float? Humidity)> historicalData = new List<(DateTime, float?, float?)>();
+
         private bool isRoleDefined = false; // Cờ để kiểm tra xem vai trò đã được định nghĩa chưa
-        
+
         public ChatBot()
         {
             InitializeComponent();
@@ -47,6 +51,12 @@ namespace ESP8266
             }
         }
 
+        // Cập nhật dữ liệu lịch sử từ MenuForm
+        public void UpdateHistoricalData(List<(DateTime Time, float? Temperature, float? Humidity)> feeds)
+        {
+            historicalData = feeds; // Cập nhật danh sách lịch sử
+        }
+
         // Phương thức gửi tin nhắn đến ChatBot
         private async void btnSend_Click(object sender, EventArgs e)
         {
@@ -55,8 +65,8 @@ namespace ESP8266
                 return;
 
             AppendMessage($"Bạn: {userInput}\n"); // Hiển thị câu hỏi của người dùng trên RichTextBox
-            string prompt = !isRoleDefined ? DefineRole() + GetCurrentEnvironmentData() + $"Câu hỏi: {userInput}" // Định nghĩa vai trò và gửi câu hỏi
-                                        : GetCurrentEnvironmentData() + $"Câu hỏi: {userInput}";
+            string prompt = !isRoleDefined ? DefineRole() + GetCurrentEnvironmentData() + GetHistoricalDataSummary() + $"Câu hỏi: {userInput}" // Định nghĩa vai trò và gửi câu hỏi
+                                        : GetCurrentEnvironmentData() + GetHistoricalDataSummary() + $"Câu hỏi: {userInput}";
             tbChat.Text = "";
             isRoleDefined = true;
 
@@ -71,6 +81,7 @@ namespace ESP8266
             isRoleDefined = false;
 
             StartNewConversation(); // Bắt đầu cuộc trò chuyện mới
+            historicalData.Clear(); // Xóa dữ liệu lịch sử khi khởi tạo lại
         }
 
         private void tbChat_KeyDown(object sender, KeyEventArgs e)
@@ -85,19 +96,37 @@ namespace ESP8266
         // Lời giới thiệu khi bắt đầu cuộc trò chuyện mới
         private void StartNewConversation()
         {
-            AppendMessage($"ChatBot: Xin chào! Tôi là ChatBot, sẵn sàng giúp bạn đánh giá trạng thái môi trường hiện tại.\n");
+            AppendMessage($"ChatBot: Xin chào! Tôi là ChatBot, sẵn sàng giúp bạn đánh giá trạng thái môi trường hiện tại và lịch sử.\n");
         }
 
         // Định nghĩa vai trò cho Gemini
         private string DefineRole()
         {
-            return "Bạn là một trợ lý AI đánh giá trạng thái môi trường dựa trên dữ liệu nhiệt độ và độ ẩm. Cung cấp phân tích ngắn gọn (tối đa 150 từ) và khuyến nghị nếu cần. ";
+            return "Bạn là một trợ lý AI đánh giá trạng thái môi trường dựa trên dữ liệu nhiệt độ và độ ẩm hiện tại và lịch sử. Cung cấp phân tích ngắn gọn (tối đa 150 từ) và khuyến nghị nếu cần. ";
         }
 
         // Lấy dữ liệu môi trường hiện tại
         private string GetCurrentEnvironmentData()
         {
-            return $"Dữ liệu môi trường hiện tại: Nhiệt độ = {prevTemperature}°C, Độ ẩm = {prevHumidity}%.";
+            return $"Dữ liệu môi trường hiện tại: Nhiệt độ = {prevTemperature}°C, Độ ẩm = {prevHumidity}%. ";
+        }
+
+        // Lấy tóm tắt dữ liệu lịch sử
+        private string GetHistoricalDataSummary()
+        {
+            if (historicalData == null || !historicalData.Any())
+                return "Không có dữ liệu lịch sử. ";
+
+            var summary = new StringBuilder();
+            summary.Append("Dữ liệu lịch sử (một phần): ");
+            
+            // Lấy 5 bản ghi gần nhất làm ví dụ
+            var recentRecords = historicalData.OrderByDescending(f => f.Time).Take(100).ToList();
+            foreach (var record in recentRecords)
+            {
+                summary.Append($"[{record.Time:yyyy-MM-dd hh:mm:ss tt}] Nhiệt độ: {record.Temperature ?? 0}°C, Độ ẩm: {record.Humidity ?? 0}%; ");
+            }
+            return summary.ToString();
         }
 
         // Gửi yêu cầu đến Gemini API và nhận phản hồi
@@ -150,6 +179,16 @@ namespace ESP8266
         }
 
         private void ChatBot_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ChatBot_FormClosed(object sender, FormClosedEventArgs e)
+        {
+
+        }
+
+        private void R(object sender, EventArgs e)
         {
 
         }
