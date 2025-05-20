@@ -1,14 +1,18 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 using System.Windows.Forms;
-using Newtonsoft.Json.Linq;
 
 namespace ESP8266
 {
-    public partial class ChatBot : UserControl
+    public partial class ChatBot: Form
     {
         private readonly HttpClient httpClient = new HttpClient();
         private readonly string geminiApiKey = "AIzaSyDYgaiUtUoh4HYayXW6UqYIVj34Lsqdshk"; // API key cho Gemini API
@@ -22,7 +26,7 @@ namespace ESP8266
         private string prevHumidity = null;
 
         private bool isRoleDefined = false; // Cờ để kiểm tra xem vai trò đã được định nghĩa chưa
-
+        
         public ChatBot()
         {
             InitializeComponent();
@@ -143,6 +147,11 @@ namespace ESP8266
 
             rtbMessages.AppendText(message);
             rtbMessages.ScrollToCaret();
+        }
+
+        private void ChatBot_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

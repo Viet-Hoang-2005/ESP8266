@@ -26,7 +26,7 @@ namespace ESP8266
         private readonly HttpClient httpClient = new HttpClient();
 
         private bool isFirstUpdateCompleted = false; // Cờ kiểm soát lần cập nhật đầu tiên
-        private ChatBot chatBot; // Thêm tham chiếu đến ChatBot
+        private ChatBot chatBot = new ChatBot();
 
         public MenuForm()
         {
@@ -37,10 +37,6 @@ namespace ESP8266
             pvTemperature.MouseWheel += PlotView_MouseWheel;
             pvHumidity.MouseWheel += PlotView_MouseWheel;
 
-            // Gọi form ChatBot
-            chatBot = new ChatBot();
-            pnChatBot.Controls.Clear();
-            pnChatBot.Controls.Add(chatBot);
         }
 
         // Hàm căn giữa cho panel để giữ bố cục khi form được phóng to
@@ -52,48 +48,59 @@ namespace ESP8266
             );
         }
 
-        // Hàm xử lý sự kiện cuộn chuột để không bị cuộn khi dùng chuột
-        private void PlotView_MouseWheel(object sender, MouseEventArgs e)
+        // Hàm lấy dữ liệu từ ThingSpeak
+        private async Task<JObject> FetchData(string url)
         {
-            ((HandledMouseEventArgs)e).Handled = true;
-        }
-
-        // Hàm xử lý sự kiện thay đổi trục thời gian
-        private void DateAxis_AxisChanged(object sender, AxisChangedEventArgs e)
-        {
-            var axis = sender as DateTimeAxis;
-            if (axis == null) return;
-
-            double range = axis.ActualMaximum - axis.ActualMinimum; // Tính khoảng cách giữa giá trị tối đa và tối thiểu
-
-            if (range > 365) // > 1 năm
-                axis.StringFormat = "yyyy";
-            else if (range > 31) // > 1 tháng
-                axis.StringFormat = "MM/yyyy";
-            else if (range > 1) // > 1 ngày
-                axis.StringFormat = "dd/MM";
-            else if (range > 1.0 / 24) // > 1 giờ
-                axis.StringFormat = "HH:mm";
-            else // < 1 giờ
-                axis.StringFormat = "HH:mm:ss";
-        }
-
-        // Hàm làm mới dữ liệu từ ThingSpeak
-        private async void StartDataRefresh()
-        {
-            while (!IsDisposed)
+            try
             {
-                await UpdateData();
+                var response = await httpClient.GetStringAsync(url); // Gửi yêu cầu GET để lấy dữ liệu từ URL đã chỉ định
+                return JObject.Parse(response); // Chuyển đổi chuỗi JSON thành đối tượng JObject để dễ dàng truy cập các thuộc tính
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
-                // Nếu lần cập nhật đầu tiên đã hoàn thành, đợi 10 phút trước khi cập nhật tiếp theo
-                if (isFirstUpdateCompleted)
+        // Hàm cập nhật thời gian làm mới dữ liệu
+        private void UpdateRefreshTime(string createdAt, DateTime vietnamTime)
+        {
+            if (createdAt != null)
+            {
+                try
                 {
-                    await Task.Delay(refreshInterval * 1000);
+                    // Phân tích thời gian từ chuỗi JSON và đảm bảo nó là UTC
+                    var createdAtUtc = DateTime.Parse(createdAt, null, System.Globalization.DateTimeStyles.RoundtripKind);
+                    if (createdAtUtc.Kind != DateTimeKind.Utc)
+                    {
+                        createdAtUtc = DateTime.SpecifyKind(createdAtUtc, DateTimeKind.Utc); // Đảm bảo là UTC
+                    }
+
+                    // Chuyển đổi sang giờ Việt Nam (UTC+7)
+                    // var createdAtUtc = DateTime.Parse(createdAt).ToUniversalTime();
+                    var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    var createdAtVietnam = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, vietnamTimeZone);
+
+                    // Tính thời gian chênh lệch để kiểm tra trạng thái ESP8266
+                    var timeDiff = (DateTime.UtcNow - createdAtUtc).TotalSeconds;
+
+                    // Cập nhật trạng thái ESP8266 và thời gian làm mới dữ liệu
+                    lblStatus.Text = timeDiff <= espOfflineThreshold
+                        ? $"Trạng thái ESP8266: Online"
+                        : $"Trạng thái ESP8266: Offline";
+                    lblRefreshData.Text = $"Dữ liệu được làm mới lúc: {createdAtVietnam:yyyy-MM-dd hh:mm:ss tt}"; // Sử dụng định dạng 12h với AM/PM
                 }
-                else
+                catch (Exception ex)
                 {
-                    isFirstUpdateCompleted = true; // Đánh dấu lần đầu tiên hoàn thành
+                    lblStatus.Text = "Lỗi khi chuyển đổi thời gian.";
+                    lblRefreshData.Text = $"Dữ liệu được làm mới lúc: {vietnamTime:yyyy-MM-dd hh:mm:ss tt} (Lỗi: {ex.Message})";
+                    Console.WriteLine($"Lỗi trong UpdateRefreshTime: {ex.Message}"); // Ghi log lỗi để debug
                 }
+            }
+            else
+            {
+                lblStatus.Text = "Trạng thái ESP8266: Không có thông tin thời gian.";
+                lblRefreshData.Text = $"Dữ liệu được làm mới lúc: {vietnamTime:yyyy-MM-dd hh:mm:ss tt} (Không có dữ liệu)";
             }
         }
 
@@ -105,7 +112,8 @@ namespace ESP8266
                 // Lấy dữ liệu mới nhất (1 bản ghi) từ ThingSpeak và chuyển đổi giờ UTC sang giờ Việt Nam
                 var latestData = await FetchData($"https://api.thingspeak.com/channels/{channelId}/feeds.json?api_key={readApiKey}&results=1");
                 var currentTimeUtc = DateTime.UtcNow;
-                var vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(currentTimeUtc, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+                var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(currentTimeUtc, vietnamTimeZone);
 
                 // Trích xuất các thông tin từ dữ liệu từ file JSON nhận được
                 if (latestData != null)
@@ -125,31 +133,36 @@ namespace ESP8266
                     if (recentData != null)
                     {
                         var feeds = recentData["feeds"]
-                        .Select(f =>
-                        {
-                            float tempValue, humValue;
-                            float? temp = float.TryParse(f["field1"]?.ToString(), out tempValue) ? (float?)Math.Round(tempValue, 2) : null;
-                            float? hum = float.TryParse(f["field2"]?.ToString(), out humValue) ? (float?)Math.Round(humValue, 2) : null;
-
-                            string createdAtStr = f["created_at"]?.ToString();
-                            DateTime time;
-                            if (!string.IsNullOrEmpty(createdAtStr))
+                            .Select(f =>
                             {
-                                time = DateTime.Parse(createdAtStr).ToUniversalTime();
-                            }
-                            else
-                            {
-                                time = DateTime.UtcNow;
-                            }
+                                float tempValue, humValue;
+                                float? temp = float.TryParse(f["field1"]?.ToString(), out tempValue) ? (float?)Math.Round(tempValue, 2) : null;
+                                float? hum = float.TryParse(f["field2"]?.ToString(), out humValue) ? (float?)Math.Round(humValue, 2) : null;
 
-                            return (
-                            Time: time,
-                            Temperature: temp,
-                            Humidity: hum
-                            );
-                        })
-                        .Where(f => f.Temperature.HasValue || f.Humidity.HasValue)
-                        .ToList();
+                                string createdAtStr = f["created_at"]?.ToString();
+                                DateTime time;
+                                if (!string.IsNullOrEmpty(createdAtStr))
+                                {
+                                    time = DateTime.Parse(createdAtStr, null, System.Globalization.DateTimeStyles.RoundtripKind);
+                                    if (time.Kind != DateTimeKind.Utc)
+                                    {
+                                        time = DateTime.SpecifyKind(time, DateTimeKind.Utc);
+                                    }
+                                    time = TimeZoneInfo.ConvertTimeFromUtc(time, vietnamTimeZone); // Chuyển đổi sang giờ Việt Nam
+                                }
+                                else
+                                {
+                                    time = vietnamTime; // Sử dụng thời gian hiện tại đã chuyển đổi
+                                }
+
+                                return (
+                                    Time: time,
+                                    Temperature: temp,
+                                    Humidity: hum
+                                );
+                            })
+                            .Where(f => f.Temperature.HasValue || f.Humidity.HasValue)
+                            .ToList();
 
                         // Vẽ biểu đồ nhiệt độ và độ ẩm
                         PlotTemperature(feeds);
@@ -173,42 +186,6 @@ namespace ESP8266
                 lblStatus.Text = $"Lỗi: {ex.Message}";
                 pvTemperature.Model = new PlotModel { Title = $"Lỗi: {ex.Message}" };
                 pvHumidity.Model = new PlotModel { Title = $"Lỗi: {ex.Message}" };
-            }
-        }
-
-        // Hàm lấy dữ liệu từ ThingSpeak
-        private async Task<JObject> FetchData(string url)
-        {
-            try
-            {
-                var response = await httpClient.GetStringAsync(url); // Gửi yêu cầu GET để lấy dữ liệu từ URL đã chỉ định
-                return JObject.Parse(response); // Chuyển đổi chuỗi JSON thành đối tượng JObject để dễ dàng truy cập các thuộc tính
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Hàm cập nhật thời gian làm mới dữ liệu
-        private void UpdateRefreshTime(string createdAt, DateTime vietnamTime)
-        {
-            if (createdAt != null)
-            {
-                var createdAtUtc = DateTime.Parse(createdAt).ToUniversalTime(); // Chuyển đổi thời gian từ chuỗi JSON sang UTC
-                var createdAtVietnam = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")); // Chuyển đổi sang giờ Việt Nam
-                var timeDiff = (DateTime.UtcNow - createdAtUtc).TotalSeconds; // Tính toán thời gian chênh lệch giữa thời gian hiện tại và thời gian tạo dữ liệu
-
-                // Cập nhật trạng thái ESP8266 và thời gian làm mới dữ liệu
-                lblStatus.Text = timeDiff <= espOfflineThreshold
-                ? $"Trạng thái ESP8266: Online"
-                : $"Trạng thái ESP8266: Offline";
-                lblRefreshData.Text = $"Dữ liệu được làm mới lúc: {createdAtVietnam:yyyy-MM-dd HH:mm:ss}";
-            }
-            else
-            {
-                lblStatus.Text = "Trạng thái ESP8266: Không có thông tin thời gian.";
-                lblRefreshData.Text = $"Dữ liệu được làm mới lúc: {vietnamTime:yyyy-MM-dd HH:mm:ss} (Không có dữ liệu)";
             }
         }
 
@@ -251,7 +228,52 @@ namespace ESP8266
             chatBot.UpdateTemperatureAndHumidity(temperature, humidity); // Cập nhật dữ liệu cho ChatBot
         }
 
-        // Hàm vẽ biểu đồ nhiệt độ
+        // Hàm làm mới dữ liệu từ ThingSpeak
+        private async void StartDataRefresh()
+        {
+            while (!IsDisposed)
+            {
+                await UpdateData();
+
+                // Nếu lần cập nhật đầu tiên đã hoàn thành, đợi 10 phút trước khi cập nhật tiếp theo
+                if (isFirstUpdateCompleted)
+                {
+                    await Task.Delay(refreshInterval * 1000);
+                }
+                else
+                {
+                    isFirstUpdateCompleted = true; // Đánh dấu lần đầu tiên hoàn thành
+                }
+            }
+        }
+
+        // Hàm xử lý sự kiện cuộn chuột để không bị cuộn khi dùng chuột
+        private void PlotView_MouseWheel(object sender, MouseEventArgs e)
+        {
+            ((HandledMouseEventArgs)e).Handled = true;
+        }
+
+        // Hàm xử lý sự kiện thay đổi trục thời gian
+        private void DateAxis_AxisChanged(object sender, AxisChangedEventArgs e)
+        {
+            var axis = sender as DateTimeAxis;
+            if (axis == null) return;
+
+            double range = axis.ActualMaximum - axis.ActualMinimum; // Tính khoảng cách giữa giá trị tối đa và tối thiểu
+
+            if (range > 365) // > 1 năm
+                axis.StringFormat = "yyyy";
+            else if (range > 31) // > 1 tháng
+                axis.StringFormat = "MM/yyyy";
+            else if (range > 1) // > 1 ngày
+                axis.StringFormat = "dd/MM";
+            else if (range > 1.0 / 24) // > 1 giờ
+                axis.StringFormat = "HH:mm";
+            else // < 1 giờ
+                axis.StringFormat = "HH:mm:ss";
+        }
+
+        // Hàm vẽ biểu đồ nhiệt độ dựa trên giá trị thời gian, nhiệt độ và độ ẩm
         private void PlotTemperature(List<(DateTime Time, float? Temperature, float? Humidity)> feeds)
         {
             var model = new PlotModel { Title = "Biểu đồ Nhiệt độ (Giờ Việt Nam)" };
@@ -259,22 +281,22 @@ namespace ESP8266
             // Tạo trục thời gian
             var dateAxis = new DateTimeAxis
             {
-                Position = AxisPosition.Bottom, // Vị trí trục nằm ở dưới
+                Position = AxisPosition.Bottom,
                 Title = "Thời gian",
-                IntervalType = DateTimeIntervalType.Auto, // Tự động điều chỉnh khoảng cách giữa các nhãn
-                MajorGridlineStyle = LineStyle.Solid, // Đường lưới chính
-                MinorGridlineStyle = LineStyle.Dot // Đường lưới phụ
+                IntervalType = DateTimeIntervalType.Auto,
+                MajorGridlineStyle = LineStyle.Solid,
+                MinorGridlineStyle = LineStyle.Dot
             };
 
-            dateAxis.AxisChanged += DateAxis_AxisChanged; // Thêm sự kiện thay đổi trục thời gian
-            model.Axes.Add(dateAxis); // Thêm trục thời gian vào mô hình
+            dateAxis.AxisChanged += DateAxis_AxisChanged;
+            model.Axes.Add(dateAxis);
 
             model.Axes.Add(new LinearAxis
             {
-                Position = AxisPosition.Left, // Vị trí trục nằm ở bên trái
+                Position = AxisPosition.Left,
                 Title = "Nhiệt độ (°C)",
-                Minimum = 0, // Giá trị tối thiểu của trục
-                Maximum = 50 // Giá trị tối đa của trục
+                Minimum = 0,
+                Maximum = 50
             });
 
             var tempSeries = new LineSeries
@@ -286,10 +308,10 @@ namespace ESP8266
             // Thêm các điểm dữ liệu vào biểu đồ
             foreach (var feed in feeds)
             {
-                if (feed.Temperature.HasValue) // Kiểm tra xem nhiệt độ có giá trị hay không
+                if (feed.Temperature.HasValue)
                 {
-                    double xValue = DateTimeAxis.ToDouble(feed.Time); // Chuyển đổi thời gian thành giá trị số
-                    tempSeries.Points.Add(new DataPoint(xValue, feed.Temperature.Value)); // Thêm điểm dữ liệu vào biểu đồ
+                    double xValue = DateTimeAxis.ToDouble(feed.Time);
+                    tempSeries.Points.Add(new DataPoint(xValue, feed.Temperature.Value));
                 }
             }
 
@@ -337,6 +359,11 @@ namespace ESP8266
 
             model.Series.Add(humSeries);
             pvHumidity.Model = model;
+        }
+
+        private void btnChatbot_Click(object sender, EventArgs e)
+        {
+            chatBot.Show();
         }
     }
 }

@@ -2,12 +2,12 @@
 {
     partial class ChatBot
     {
-        /// <summary> 
+        /// <summary>
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
@@ -43,12 +43,12 @@
             this.tbChat.DefaultText = "";
             this.tbChat.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.tbChat.ForeColor = System.Drawing.Color.Black;
-            this.tbChat.Location = new System.Drawing.Point(3, 521);
+            this.tbChat.Location = new System.Drawing.Point(27, 547);
             this.tbChat.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tbChat.Name = "tbChat";
             this.tbChat.PlaceholderText = "Nhập tin nhắn";
             this.tbChat.SelectedText = "";
-            this.tbChat.Size = new System.Drawing.Size(929, 48);
+            this.tbChat.Size = new System.Drawing.Size(369, 48);
             this.tbChat.TabIndex = 1;
             this.tbChat.TextOffset = new System.Drawing.Point(10, 0);
             this.tbChat.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbChat_KeyDown);
@@ -62,15 +62,16 @@
             this.pnChatBot.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnChatBot.Location = new System.Drawing.Point(0, 0);
             this.pnChatBot.Name = "pnChatBot";
-            this.pnChatBot.Size = new System.Drawing.Size(1069, 590);
+            this.pnChatBot.Size = new System.Drawing.Size(552, 613);
             this.pnChatBot.TabIndex = 3;
             // 
             // rtbMessages
             // 
             this.rtbMessages.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.rtbMessages.Location = new System.Drawing.Point(3, 0);
+            this.rtbMessages.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rtbMessages.Location = new System.Drawing.Point(27, 29);
             this.rtbMessages.Name = "rtbMessages";
-            this.rtbMessages.Size = new System.Drawing.Size(1063, 497);
+            this.rtbMessages.Size = new System.Drawing.Size(497, 497);
             this.rtbMessages.TabIndex = 3;
             this.rtbMessages.Text = "";
             // 
@@ -88,7 +89,7 @@
             this.btnRefresh.ForeColor = System.Drawing.Color.White;
             this.btnRefresh.Image = global::ESP8266.Properties.Resources.icons8_refresh_96;
             this.btnRefresh.ImageSize = new System.Drawing.Size(50, 50);
-            this.btnRefresh.Location = new System.Drawing.Point(1018, 521);
+            this.btnRefresh.Location = new System.Drawing.Point(479, 547);
             this.btnRefresh.Name = "btnRefresh";
             this.btnRefresh.Size = new System.Drawing.Size(48, 48);
             this.btnRefresh.TabIndex = 2;
@@ -107,7 +108,7 @@
             this.btnSend.FillColor = System.Drawing.Color.Transparent;
             this.btnSend.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnSend.ForeColor = System.Drawing.Color.White;
-            this.btnSend.Location = new System.Drawing.Point(954, 521);
+            this.btnSend.Location = new System.Drawing.Point(415, 547);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(48, 48);
             this.btnSend.TabIndex = 2;
@@ -117,9 +118,11 @@
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.White;
+            this.ClientSize = new System.Drawing.Size(552, 613);
             this.Controls.Add(this.pnChatBot);
             this.Name = "ChatBot";
-            this.Size = new System.Drawing.Size(1069, 590);
+            this.Text = "ChatBot";
+            this.Load += new System.EventHandler(this.ChatBot_Load);
             this.pnChatBot.ResumeLayout(false);
             this.ResumeLayout(false);
 
