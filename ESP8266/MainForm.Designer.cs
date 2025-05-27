@@ -31,14 +31,12 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.pnMain = new System.Windows.Forms.Panel();
             this.pnLogin = new Guna.UI2.WinForms.Guna2Panel();
-            this.pnMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnMain
             // 
             this.pnMain.BackColor = System.Drawing.Color.Transparent;
             this.pnMain.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pnMain.Controls.Add(this.pnLogin);
             this.pnMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnMain.Location = new System.Drawing.Point(0, 0);
             this.pnMain.Name = "pnMain";
@@ -60,6 +58,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Lime;
             this.ClientSize = new System.Drawing.Size(1182, 953);
+            this.Controls.Add(this.pnLogin);
             this.Controls.Add(this.pnMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -68,7 +67,6 @@
             this.Tag = "Giám sát thiết bị Real-time";
             this.Text = "MainForm";
             this.TransparencyKey = System.Drawing.Color.Lime;
-            this.pnMain.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

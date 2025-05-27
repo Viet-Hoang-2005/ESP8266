@@ -293,13 +293,12 @@ namespace ESP8266
 
                             deviceCmd.ExecuteNonQuery();
                         }
-                    }
-
-                    // Cập nhật thành công, làm mới giao diện
-                    lblStatus.Text = "Cập nhật thông tin thành công!";
+                    }    
 
                     InitializeUser();
                     InitializeDevice();
+
+                    lblStatus.Text = "Cập nhật thông tin thành công!";
                 }
             }
             catch (NpgsqlException ex)
@@ -324,7 +323,8 @@ namespace ESP8266
 
         private void btnOut_Click(object sender, EventArgs e)
         {
-            main.Close();
+            main.ShowLogin();
+            //main.Close();
         }
     }
 }

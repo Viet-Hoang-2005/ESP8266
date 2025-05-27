@@ -14,8 +14,7 @@ namespace ESP8266
     {
         private MainForm main;
         private string srcemail;
-        private const string connString = "Host=aws-0-ap-southeast-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.bzjfiynoyelxlpowlhty;Password=laptrinhmang;SSL Mode=Require;Trust Server Certificate=true";
-
+        
         public Home(MainForm mainForm, string email)
         {
             InitializeComponent();

@@ -10,24 +10,20 @@ using System.Windows.Forms;
 
 namespace ESP8266
 {
-    public partial class MainForm: Form
+    public partial class MainForm : Form
     {
-        private Home home;
-
+        private Home home = null;
         public MainForm()
         {
             InitializeComponent();
             SignUp signUp = new SignUp(this);
+            pnLogin.Controls.Clear();
             pnLogin.Controls.Add(signUp);
-
         }
 
         public void ShowHome(string s)
         {
-            if (home == null)
-            {
-                home = new Home(this, s);
-            }
+            home = new Home(this, s);
 
             pnLogin.Controls.Clear();
             pnLogin.Visible = false;
@@ -41,16 +37,16 @@ namespace ESP8266
 
         public void ShowLogin()
         {
-            //pnMain.Controls.Clear();
-            //pnMain.Visible = false;
+            Login login = new Login(this);
 
-            //pnLogin.Controls.Clear();
-            //Login login = new Login(this);
+            pnMain.Controls.Clear();
+            pnMain.Visible = false;
 
-            //pnLogin.Controls.Add(login);
-            //pnLogin.Visible = true;
-            //pnLogin.BringToFront();
-            //this.Activate();
+            pnLogin.Controls.Clear();
+            pnLogin.Controls.Add(login);
+            pnLogin.Visible = true;
+            login.Visible = true;
+            this.Activate();
         }
     }
 }

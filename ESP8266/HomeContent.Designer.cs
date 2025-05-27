@@ -176,7 +176,7 @@
             this.btnRelay.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
             this.btnRelay.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
             this.btnRelay.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.btnRelay.FillColor = System.Drawing.Color.PaleGreen;
+            this.btnRelay.FillColor = System.Drawing.Color.Gray;
             this.btnRelay.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
             this.btnRelay.ForeColor = System.Drawing.Color.Black;
             this.btnRelay.Location = new System.Drawing.Point(18, 48);
@@ -191,9 +191,9 @@
             this.lblRefreshData.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblRefreshData.Location = new System.Drawing.Point(51, 141);
             this.lblRefreshData.Name = "lblRefreshData";
-            this.lblRefreshData.Size = new System.Drawing.Size(245, 25);
+            this.lblRefreshData.Size = new System.Drawing.Size(331, 25);
             this.lblRefreshData.TabIndex = 0;
-            this.lblRefreshData.Text = "Dữ liệu được làm mới lúc: None\r\n\r\n";
+            this.lblRefreshData.Text = "Dữ liệu được làm mới lúc: không có dữ liệu\r\n\r\n\r\n\r\n";
             // 
             // lblStatus
             // 
